@@ -28,6 +28,14 @@ services:
       timeout: 5s
       retries: 5
 
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    ports:
+      - "8554:8554"
+      - "1935:1935"
+      - "8888:8888"
+      - "8889:8889"
+
   rails-web:
     build:
       context: ./rails-core
@@ -36,6 +44,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mediamtx:
+        condition: service_started
     environment:
       RAILS_ENV: development
       POSTGRES_HOST: postgres
@@ -50,6 +60,10 @@ services:
       OPS_DASHBOARD_TOKEN: ops-local-token-change-me
       OPS_DASHBOARD_USER: opsadmin
       OPS_DASHBOARD_PASSWORD: ops-local-password-change-me
+      MEDIA_RTSP_BASE_URL: rtsp://localhost:8554
+      MEDIA_RTMP_BASE_URL: rtmp://localhost:1935
+      MEDIA_HLS_BASE_URL: http://localhost:8888
+      MEDIA_WEBRTC_BASE_URL: http://localhost:8889
       RAILS_MAX_THREADS: 8
       PORT: 3000
     ports:
@@ -64,6 +78,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mediamtx:
+        condition: service_started
     environment:
       RAILS_ENV: development
       POSTGRES_HOST: postgres

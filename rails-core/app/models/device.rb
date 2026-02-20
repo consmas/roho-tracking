@@ -7,6 +7,7 @@ class Device < ApplicationRecord
   has_many :commands, dependent: :nullify
   has_many :trips, dependent: :nullify
   has_many :telemetry_points, dependent: :nullify
+  has_many :stream_sessions, dependent: :destroy
   has_one :device_session, dependent: :destroy
 
   enum status: { provisioned: 0, active: 1, suspended: 2 }, _default: :provisioned

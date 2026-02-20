@@ -4,7 +4,7 @@ Production-oriented monorepo for a high-scale vehicle telematics backend replaci
 
 - `gateway/`: Go TCP gateway for persistent MDVR connections
 - `rails-core/`: Rails API core + Sidekiq stream consumers
-- `docker-compose.yml`: local orchestration with PostgreSQL + Redis
+- `docker-compose.yml`: local orchestration with PostgreSQL + Redis + MediaMTX
 
 ## Directory Tree
 
@@ -167,6 +167,11 @@ docker compose up --build
 Rails API: `http://localhost:3000`
 Gateway TCP: `localhost:9000`
 Gateway metrics: `http://localhost:9100/metrics`
+Media ingress/playback:
+- RTSP ingest: `rtsp://localhost:8554`
+- RTMP ingest: `rtmp://localhost:1935`
+- HLS playback: `http://localhost:8888`
+- WebRTC/WHEP playback: `http://localhost:8889`
 
 Optional seed:
 
@@ -290,6 +295,23 @@ Commands:
 - `GET /api/v1/commands/:id`
 - `POST /api/v1/commands`
 
+Live streams:
+- `GET /api/v1/streams`
+- `GET /api/v1/streams/:id`
+- `POST /api/v1/streams`
+- `DELETE /api/v1/streams/:id`
+
+Example start stream session:
+
+```bash
+curl -s -X POST http://localhost:3000/api/v1/streams \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"stream":{"device_uid":"827930","channel":1}}'
+```
+
+The response includes browser playback URLs (`webrtc`, `hls`) and ingest targets (`rtsp`, `rtmp`).
+
 Internal service endpoint (gateway only):
 - `GET /internal/devices/lookup?uid=<device_uid>` with `X-Internal-Token`
 
@@ -313,6 +335,12 @@ Required env var on Rails:
 - `OPS_DASHBOARD_TOKEN`
 - `OPS_DASHBOARD_USER`
 - `OPS_DASHBOARD_PASSWORD`
+
+Optional media URL env vars on Rails:
+- `MEDIA_RTSP_BASE_URL`
+- `MEDIA_RTMP_BASE_URL`
+- `MEDIA_HLS_BASE_URL`
+- `MEDIA_WEBRTC_BASE_URL`
 
 ## Scaling Guidance
 

@@ -52,6 +52,7 @@ Rails.application.routes.draw do
       resources :alarms, only: [:index, :show, :update, :destroy]
       resources :telemetry_points, only: [:index]
       resources :commands, only: [:index, :show, :create]
+      resources :streams, only: [:index, :show, :create, :destroy]
     end
   end
 end
