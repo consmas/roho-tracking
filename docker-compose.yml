@@ -73,10 +73,10 @@ services:
       OPS_DASHBOARD_TOKEN: ops-local-token-change-me
       OPS_DASHBOARD_USER: opsadmin
       OPS_DASHBOARD_PASSWORD: ops-local-password-change-me
-      MEDIA_RTSP_BASE_URL: rtsp://localhost:8554
-      MEDIA_RTMP_BASE_URL: rtmp://localhost:1935
-      MEDIA_HLS_BASE_URL: http://localhost:8888
-      MEDIA_WEBRTC_BASE_URL: http://localhost:8889
+      MEDIA_RTSP_BASE_URL: ${MEDIA_RTSP_BASE_URL:-rtsp://localhost:8554}
+      MEDIA_RTMP_BASE_URL: ${MEDIA_RTMP_BASE_URL:-rtmp://localhost:1935}
+      MEDIA_HLS_BASE_URL: ${MEDIA_HLS_BASE_URL:-http://localhost:8888}
+      MEDIA_WEBRTC_BASE_URL: ${MEDIA_WEBRTC_BASE_URL:-http://localhost:8889}
       MEDIA_MTX_API_URL: http://mediamtx:9997
       MEDIA_MTX_PATHS_ENDPOINT: /v3/paths/list
       MEDIA_MTX_API_TIMEOUT_SECONDS: 2
