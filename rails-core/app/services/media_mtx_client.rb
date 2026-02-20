@@ -30,6 +30,7 @@ class MediaMtxClient
     url = build_url(endpoint)
     req = Net::HTTP::Get.new(url)
     req["Accept"] = "application/json"
+    apply_auth_headers(req)
 
     Net::HTTP.start(url.host, url.port, use_ssl: url.scheme == "https", open_timeout: timeout_seconds,
                     read_timeout: timeout_seconds) do |http|
@@ -50,5 +51,19 @@ class MediaMtxClient
 
   def timeout_seconds
     ENV.fetch("MEDIA_MTX_API_TIMEOUT_SECONDS", "2").to_i
+  end
+
+  def apply_auth_headers(req)
+    bearer = ENV["MEDIA_MTX_API_BEARER_TOKEN"].to_s
+    if bearer.present?
+      req["Authorization"] = "Bearer #{bearer}"
+      return
+    end
+
+    username = ENV["MEDIA_MTX_API_USERNAME"].to_s
+    password = ENV["MEDIA_MTX_API_PASSWORD"].to_s
+    return if username.empty?
+
+    req.basic_auth(username, password)
   end
 end
