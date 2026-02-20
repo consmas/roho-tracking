@@ -41,6 +41,15 @@ func NewBinaryJSONParser() *BinaryJSONParser {
 	return &BinaryJSONParser{}
 }
 
+func NewParser(name string) Parser {
+	switch name {
+	case "joinlgo_text":
+		return NewJoinLGOTextParser()
+	default:
+		return NewBinaryJSONParser()
+	}
+}
+
 func (p *BinaryJSONParser) Parse(raw []byte) (*Frame, error) {
 	if len(raw) < 2 {
 		return nil, errors.New("frame too short")

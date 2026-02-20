@@ -150,6 +150,17 @@ func (s *TCPServer) readFrame(reader *bufio.Reader, conn net.Conn) ([]byte, erro
 	if err := conn.SetReadDeadline(time.Now().Add(s.cfg.ReadTimeout)); err != nil {
 		return nil, err
 	}
+	if s.cfg.Protocol == "joinlgo_text" {
+		frame, err := reader.ReadBytes('#')
+		if err != nil {
+			return nil, err
+		}
+		if len(frame) > s.cfg.MaxFrameBytes {
+			return nil, fmt.Errorf("invalid frame length: %d", len(frame))
+		}
+		return frame, nil
+	}
+
 	header := make([]byte, 2)
 	if _, err := io.ReadFull(reader, header); err != nil {
 		return nil, err
@@ -203,7 +214,7 @@ func (s *TCPServer) processFrame(ctx context.Context, deviceUID string, frame *p
 	}
 	s.metrics.FramesPublished.WithLabelValues(eventType, "ok").Inc()
 
-	if eventType == string(protocol.EventTypeHeartbeat) {
+	if eventType == string(protocol.EventTypeHeartbeat) && s.cfg.Protocol == "binary_json" {
 		ack, _ := json.Marshal(map[string]any{"type": "heartbeat_ack", "ts": time.Now().UTC().Format(time.RFC3339)})
 		frame := make([]byte, 2+len(ack))
 		frame[0] = byte(len(ack) >> 8)

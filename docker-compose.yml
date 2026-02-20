@@ -87,6 +87,7 @@ services:
       GATEWAY_INSTANCE_ID: gateway-1
       GATEWAY_LISTEN_ADDR: ":9000"
       GATEWAY_METRICS_ADDR: ":9100"
+      GATEWAY_PROTOCOL: binary_json
       GATEWAY_CAPTURE_ENABLED: "false"
       GATEWAY_CAPTURE_DIR: /tmp/gateway-captures
       GATEWAY_CAPTURE_FRAMES: 40

@@ -11,6 +11,7 @@ type Config struct {
 	GatewayID         string
 	ListenAddr        string
 	MetricsAddr       string
+	Protocol          string
 	CaptureEnabled    bool
 	CaptureDir        string
 	CaptureFrames     int
@@ -41,6 +42,7 @@ func Load() (Config, error) {
 		GatewayID:         getEnv("GATEWAY_INSTANCE_ID", "gateway-1"),
 		ListenAddr:        getEnv("GATEWAY_LISTEN_ADDR", ":9000"),
 		MetricsAddr:       getEnv("GATEWAY_METRICS_ADDR", ":9100"),
+		Protocol:          getEnv("GATEWAY_PROTOCOL", "binary_json"),
 		CaptureEnabled:    getEnvBool("GATEWAY_CAPTURE_ENABLED", false),
 		CaptureDir:        getEnv("GATEWAY_CAPTURE_DIR", "/tmp/gateway-captures"),
 		CaptureFrames:     getEnvInt("GATEWAY_CAPTURE_FRAMES", 20),
@@ -74,6 +76,9 @@ func Load() (Config, error) {
 	}
 	if cfg.CaptureFrames < 1 {
 		return Config{}, fmt.Errorf("GATEWAY_CAPTURE_FRAMES must be >= 1")
+	}
+	if cfg.Protocol != "binary_json" && cfg.Protocol != "joinlgo_text" {
+		return Config{}, fmt.Errorf("GATEWAY_PROTOCOL must be binary_json or joinlgo_text")
 	}
 	return cfg, nil
 }

@@ -60,7 +60,7 @@ func main() {
 		logger,
 	)
 	captureManager := capture.NewManager(cfg.CaptureEnabled, cfg.CaptureDir, cfg.CaptureFrames, logger)
-	parser := protocol.NewBinaryJSONParser()
+	parser := protocol.NewParser(cfg.Protocol)
 	publisher := publish.NewPublisher(redisClient, cfg.EventsStream)
 
 	tcpServer := server.NewTCPServer(cfg, authService, captureManager, parser, manager, publisher, metrics, logger)

@@ -136,6 +136,9 @@ Gateway:
 - JSON structured logs (`zap`)
 - Prometheus metrics: `gateway_active_connections`, frame publish counters, queue drops, command results
 - `GET /healthz` and `GET /metrics` on metrics port
+- Protocol mode via `GATEWAY_PROTOCOL`:
+  - `binary_json` (simulator/dev)
+  - `joinlgo_text` (real JOINLGO `$$...#` frames)
 
 Rails:
 - `GET /healthz`
@@ -212,6 +215,7 @@ puts({command_id: c.command_id, status: c.status, error_message: c.error_message
 Gateway can capture first N inbound frames per connection for real-device protocol analysis.
 
 Gateway env vars:
+- `GATEWAY_PROTOCOL=binary_json|joinlgo_text`
 - `GATEWAY_CAPTURE_ENABLED=true|false`
 - `GATEWAY_CAPTURE_DIR=/tmp/gateway-captures`
 - `GATEWAY_CAPTURE_FRAMES=40`
