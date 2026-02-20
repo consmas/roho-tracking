@@ -30,6 +30,9 @@ services:
 
   mediamtx:
     image: bluenviron/mediamtx:latest
+    environment:
+      MTX_API: "yes"
+      MTX_APIADDRESS: ":9997"
     ports:
       - "8554:8554"
       - "1935:1935"
@@ -64,6 +67,12 @@ services:
       MEDIA_RTMP_BASE_URL: rtmp://localhost:1935
       MEDIA_HLS_BASE_URL: http://localhost:8888
       MEDIA_WEBRTC_BASE_URL: http://localhost:8889
+      MEDIA_MTX_API_URL: http://mediamtx:9997
+      MEDIA_MTX_PATHS_ENDPOINT: /v3/paths/list
+      MEDIA_MTX_API_TIMEOUT_SECONDS: 2
+      STREAM_STATUS_POLL_INTERVAL_SECONDS: 5
+      STREAM_REQUEST_TIMEOUT_SECONDS: 90
+      STREAM_STATUS_POLL_LIMIT: 200
       RAILS_MAX_THREADS: 8
       PORT: 3000
     ports:
@@ -94,6 +103,12 @@ services:
       OPS_DASHBOARD_TOKEN: ops-local-token-change-me
       OPS_DASHBOARD_USER: opsadmin
       OPS_DASHBOARD_PASSWORD: ops-local-password-change-me
+      MEDIA_MTX_API_URL: http://mediamtx:9997
+      MEDIA_MTX_PATHS_ENDPOINT: /v3/paths/list
+      MEDIA_MTX_API_TIMEOUT_SECONDS: 2
+      STREAM_STATUS_POLL_INTERVAL_SECONDS: 5
+      STREAM_REQUEST_TIMEOUT_SECONDS: 90
+      STREAM_STATUS_POLL_LIMIT: 200
       RAILS_MAX_THREADS: 8
       RAILS_STREAM_GROUP: rails-consumers
       RAILS_STREAM_CONSUMER: sidekiq-1

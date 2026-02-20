@@ -8,6 +8,7 @@ Sidekiq.configure_server do |config|
   config.on(:startup) do
     TelemetryStreamConsumerJob.perform_async
     CommandResultConsumerJob.perform_async
+    StreamSessionStatusPollerJob.perform_async
   end
 end
 

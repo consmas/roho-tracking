@@ -341,6 +341,23 @@ Optional media URL env vars on Rails:
 - `MEDIA_RTMP_BASE_URL`
 - `MEDIA_HLS_BASE_URL`
 - `MEDIA_WEBRTC_BASE_URL`
+- `MEDIA_MTX_API_URL` (default `http://mediamtx:9997`)
+- `MEDIA_MTX_PATHS_ENDPOINT` (default `/v3/paths/list`)
+- `MEDIA_MTX_API_TIMEOUT_SECONDS` (default `2`)
+- `STREAM_STATUS_POLL_INTERVAL_SECONDS` (default `5`)
+- `STREAM_REQUEST_TIMEOUT_SECONDS` (default `90`)
+- `STREAM_STATUS_POLL_LIMIT` (default `200`)
+
+### Automatic stream status updater
+
+Sidekiq now runs a `StreamSessionStatusPollerJob` that periodically queries MediaMTX path state and updates stream sessions:
+
+- `requested -> active` when stream path is ready/receiving data
+- `requested -> failed` when request timeout is exceeded
+
+Logs emitted by sidekiq:
+- `stream_status_poll`
+- `stream_status_poller_failed`
 
 ## Scaling Guidance
 

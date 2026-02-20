@@ -78,7 +78,8 @@ module Ops
           telemetry_points: TelemetryPoint.count,
           alarms: Alarm.count,
           commands: Command.count,
-          device_sessions: DeviceSession.count
+          device_sessions: DeviceSession.count,
+          stream_sessions: StreamSession.count
         },
         recent: {
           events: Event.order(created_at: :desc).limit(10).pluck(:event_id, :event_type, :occurred_at),
