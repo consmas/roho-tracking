@@ -1,14 +1,17 @@
 require "digest"
+require "rack/session/cookie"
 require "sidekiq/web"
 
 Rails.application.routes.draw do
   sidekiq_user = ENV.fetch("OPS_DASHBOARD_USER", "opsadmin")
   sidekiq_password = ENV.fetch("OPS_DASHBOARD_PASSWORD", "ops-local-password-change-me")
 
-  Sidekiq::Web.use Rack::Session::Cookie,
-                   secret: Rails.application.secret_key_base,
-                   same_site: true,
-                   max_age: 86_400
+  if defined?(Rack::Session::Cookie)
+    Sidekiq::Web.use Rack::Session::Cookie,
+                     secret: Rails.application.secret_key_base,
+                     same_site: true,
+                     max_age: 86_400
+  end
   Sidekiq::Web.use Rack::Auth::Basic do |username, password|
     username_ok = ActiveSupport::SecurityUtils.secure_compare(
       Digest::SHA256.hexdigest(username.to_s),
