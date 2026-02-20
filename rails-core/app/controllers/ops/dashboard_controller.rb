@@ -100,6 +100,15 @@ module Ops
       }
     end
 
+    def redis_role
+      role_resp = REDIS.call("ROLE")
+      return role_resp[0] if role_resp.is_a?(Array) && role_resp.any?
+
+      "unknown"
+    rescue StandardError => e
+      "error: #{e.class}: #{e.message}"
+    end
+
     def stream_info(stream)
       {
         length: REDIS.xlen(stream),
