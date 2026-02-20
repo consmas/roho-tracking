@@ -1,0 +1,14 @@
+.DS_Store
+
+# Go
+gateway/bin/
+gateway/.cache/
+
+# Ruby
+rails-core/log/
+rails-core/tmp/
+rails-core/vendor/bundle/
+rails-core/.bundle/
+
+# Docker
+*.pid

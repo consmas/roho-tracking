@@ -1,0 +1,115 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: telematics_development
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rails-web:
+    build:
+      context: ./rails-core
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: development
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: telematics_development
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: super-secret-change-me
+      JWT_ISSUER: roho-telematics
+      INTERNAL_API_TOKEN: internal-dev-token
+      RAILS_MAX_THREADS: 8
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    command: ["sh", "-c", "bundle exec rails db:prepare && bundle exec puma -C config/puma.rb"]
+
+  sidekiq:
+    build:
+      context: ./rails-core
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: development
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: telematics_development
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: super-secret-change-me
+      JWT_ISSUER: roho-telematics
+      INTERNAL_API_TOKEN: internal-dev-token
+      RAILS_MAX_THREADS: 8
+      RAILS_STREAM_GROUP: rails-consumers
+      RAILS_STREAM_CONSUMER: sidekiq-1
+    command: ["sh", "-c", "bundle exec sidekiq -q streams -q default"]
+
+  gateway:
+    build:
+      context: ./gateway
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      GATEWAY_INSTANCE_ID: gateway-1
+      GATEWAY_LISTEN_ADDR: ":9000"
+      GATEWAY_METRICS_ADDR: ":9100"
+      GATEWAY_CAPTURE_ENABLED: "false"
+      GATEWAY_CAPTURE_DIR: /tmp/gateway-captures
+      GATEWAY_CAPTURE_FRAMES: 40
+      REDIS_ADDR: redis:6379
+      REDIS_DB: 0
+      REDIS_EVENTS_STREAM: telemetry.events
+      REDIS_COMMANDS_STREAM: device.commands
+      REDIS_COMMAND_RESULTS_STREAM: device.command_results
+      REDIS_GATEWAY_GROUP: gateway-consumers
+      GATEWAY_DEVICE_LOOKUP_URL: http://rails-web:3000/internal/devices/lookup
+      GATEWAY_INTERNAL_API_TOKEN: internal-dev-token
+      GATEWAY_AUTH_CACHE_TTL: 5m
+      GATEWAY_AUTH_NEGATIVE_TTL: 30s
+      GATEWAY_AUTH_LOOKUP_TIMEOUT: 2s
+      GATEWAY_READ_TIMEOUT: 35s
+      GATEWAY_WRITE_TIMEOUT: 10s
+      GATEWAY_SEND_BUFFER: 256
+      GATEWAY_MAX_FRAME_BYTES: 8192
+      GATEWAY_SESSION_TTL: 70s
+    ports:
+      - "9000:9000"
+      - "9100:9100"
+
+volumes:
+  postgres_data:
+  redis_data:

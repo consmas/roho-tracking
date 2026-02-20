@@ -1,0 +1,16 @@
+source "https://rubygems.org"
+
+gem "rails", "~> 7.1.5"
+gem "pg", "~> 1.5"
+gem "puma", "~> 6.4"
+gem "redis", "~> 5.2"
+gem "sidekiq", "~> 7.3"
+gem "connection_pool", "~> 2.5.4"
+gem "jwt", "~> 2.9"
+gem "bcrypt", "~> 3.1"
+gem "rack-cors", "~> 2.0"
+gem "bootsnap", require: false
+
+group :development, :test do
+  gem "rspec-rails", "~> 6.1"
+end

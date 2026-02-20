@@ -1,0 +1,20 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 8) %>
+  host: <%= ENV.fetch("POSTGRES_HOST", "postgres") %>
+  port: <%= ENV.fetch("POSTGRES_PORT", 5432) %>
+  username: <%= ENV.fetch("POSTGRES_USER", "postgres") %>
+  password: <%= ENV.fetch("POSTGRES_PASSWORD", "postgres") %>
+
+development:
+  <<: *default
+  database: <%= ENV.fetch("POSTGRES_DB", "telematics_development") %>
+
+test:
+  <<: *default
+  database: telematics_test
+
+production:
+  <<: *default
+  database: <%= ENV.fetch("POSTGRES_DB", "telematics_production") %>
