@@ -8,4 +8,10 @@ class StreamSession < ApplicationRecord
   validates :session_id, :stream_name, presence: true
   validates :session_id, uniqueness: true
   validates :channel, numericality: { greater_than: 0, less_than_or_equal_to: 16 }
+
+  scope :open_states, -> { where(status: [:requested, :active]) }
+
+  def self.find_open(device_id:, channel:)
+    open_states.where(device_id:, channel:).order(created_at: :desc).first
+  end
 end

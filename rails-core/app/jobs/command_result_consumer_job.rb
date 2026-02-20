@@ -69,6 +69,11 @@ class CommandResultConsumerJob
     else
       command.update!(status: :failed, error_message: payload.dig("details", "reason"))
     end
+    StreamSessionCommandResultUpdater.call(
+      command: command,
+      status: payload.fetch("status"),
+      details: payload["details"] || {}
+    )
 
     REDIS.xack(STREAM, GROUP, message_id)
   rescue StandardError => e

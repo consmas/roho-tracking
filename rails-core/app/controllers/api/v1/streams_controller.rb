@@ -1,3 +1,5 @@
+require "uri"
+
 module Api
   module V1
     class StreamsController < BaseController
@@ -21,6 +23,11 @@ module Api
 
         channel = stream_params[:channel].to_i
         channel = 1 if channel <= 0
+
+        if (existing = StreamSession.find_open(device_id: device.id, channel: channel))
+          return render json: serialize_stream_session(existing), status: :ok
+        end
+
         stream_name = stream_params[:stream_name].presence || "devices/#{device.uid}/ch#{channel}"
         urls = MediaUrlBuilder.call(stream_name:)
 
@@ -42,15 +49,26 @@ module Api
         )
 
         command_id = publish_stream_control_command(device:, session:, action: "start_live")
+        session.update!(
+          start_command_id: command_id,
+          activation_deadline_at: Time.current + stream_request_timeout_seconds
+        )
 
-        render json: serialize_stream_session(session).merge(
+        render json: serialize_stream_session(session.reload).merge(
           command: { command_id:, action: "start_live", status: "queued" }
         ), status: :created
       end
 
       def destroy
+        return render json: serialize_stream_session(@stream_session), status: :ok if @stream_session.ended? || @stream_session.failed?
+
         command_id = publish_stream_control_command(device: @stream_session.device, session: @stream_session, action: "stop_live")
-        @stream_session.update!(status: :ended, ended_at: Time.current)
+        @stream_session.update!(
+          stop_command_id: command_id,
+          status: :ended,
+          ended_at: Time.current,
+          ended_reason: "stop_requested"
+        )
 
         render json: serialize_stream_session(@stream_session).merge(
           command: { command_id:, action: "stop_live", status: "queued" }
@@ -81,7 +99,8 @@ module Api
       def serialize_stream_session(session)
         session.as_json(only: [
                         :id, :session_id, :channel, :stream_name, :status, :playback_urls, :ingest_url,
-                        :started_at, :ended_at, :last_error, :created_at, :updated_at
+                        :started_at, :ended_at, :last_error, :activation_deadline_at, :start_command_id, :stop_command_id,
+                        :ended_reason, :created_at, :updated_at
                       ]).merge(
                         device: session.device&.as_json(only: [:id, :uid, :status]),
                         requested_by: session.user&.as_json(only: [:id, :email, :role])
@@ -89,6 +108,7 @@ module Api
       end
 
       def publish_stream_control_command(device:, session:, action:)
+        ingest_uri = URI.parse(session.ingest_url)
         command = Command.create!(
           command_id: SecureRandom.uuid,
           company_id: device.company_id,
@@ -100,7 +120,13 @@ module Api
             session_id: session.session_id,
             stream_name: session.stream_name,
             channel: session.channel,
-            transport: session.metadata["requested_transport"]
+            transport: session.metadata["requested_transport"],
+            ingest: {
+              rtsp_url: session.ingest_url,
+              host: ingest_uri.host,
+              port: ingest_uri.port,
+              path: ingest_uri.path
+            }
           },
           status: :queued,
           requested_at: Time.current
@@ -129,6 +155,10 @@ module Api
         )
 
         command.command_id
+      end
+
+      def stream_request_timeout_seconds
+        ENV.fetch("STREAM_REQUEST_TIMEOUT_SECONDS", "90").to_i.seconds
       end
     end
   end

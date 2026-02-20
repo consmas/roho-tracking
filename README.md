@@ -312,6 +312,12 @@ curl -s -X POST http://localhost:3000/api/v1/streams \
 
 The response includes browser playback URLs (`webrtc`, `hls`) and ingest targets (`rtsp`, `rtmp`).
 
+Stream lifecycle behavior:
+- One open stream session (`requested` or `active`) is allowed per `device + channel`
+- New start requests return the existing open session
+- If no media path appears before `STREAM_REQUEST_TIMEOUT_SECONDS`, session becomes `failed`
+- Stream sessions are linked to command IDs (`start_command_id`, `stop_command_id`) for troubleshooting
+
 Internal service endpoint (gateway only):
 - `GET /internal/devices/lookup?uid=<device_uid>` with `X-Internal-Token`
 

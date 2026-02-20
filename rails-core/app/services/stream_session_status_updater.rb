@@ -17,14 +17,14 @@ class StreamSessionStatusUpdater
     paths = client.paths_by_name
     activated = 0
     failed = 0
-    threshold = Time.current - request_timeout_seconds
+    now = Time.current
 
     sessions.each do |session|
       path_info = paths[session.stream_name]
       if path_ready?(path_info)
         session.update!(status: :active, last_error: nil)
         activated += 1
-      elsif session.created_at <= threshold
+      elsif timed_out?(session, now)
         session.update!(status: :failed, ended_at: Time.current, last_error: "stream_not_ready_timeout")
         failed += 1
       end
@@ -39,6 +39,11 @@ class StreamSessionStatusUpdater
 
   def request_timeout_seconds
     ENV.fetch("STREAM_REQUEST_TIMEOUT_SECONDS", "90").to_i
+  end
+
+  def timed_out?(session, now)
+    deadline = session.activation_deadline_at || (session.created_at + request_timeout_seconds.seconds)
+    deadline <= now
   end
 
   def path_ready?(path_info)
