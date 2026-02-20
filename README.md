@@ -293,6 +293,24 @@ Commands:
 Internal service endpoint (gateway only):
 - `GET /internal/devices/lookup?uid=<device_uid>` with `X-Internal-Token`
 
+## Ops Dashboard
+
+Operational dashboard for live diagnostics, stream health, and recovery actions:
+
+- URL: `/ops?token=<OPS_DASHBOARD_TOKEN>`
+- JSON: `/ops.json?token=<OPS_DASHBOARD_TOKEN>`
+
+Actions available from dashboard:
+- Enqueue stream consumers
+- Recreate Redis stream groups
+- Replay pending telemetry (re-ingest + ack)
+- Ack pending telemetry
+- Clear Sidekiq retry set
+- Clear Sidekiq dead set
+
+Required env var on Rails:
+- `OPS_DASHBOARD_TOKEN`
+
 ## Scaling Guidance
 
 Gateway:

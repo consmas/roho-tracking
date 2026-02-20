@@ -47,6 +47,7 @@ services:
       JWT_SECRET: super-secret-change-me
       JWT_ISSUER: roho-telematics
       INTERNAL_API_TOKEN: internal-dev-token
+      OPS_DASHBOARD_TOKEN: ops-local-token-change-me
       RAILS_MAX_THREADS: 8
       PORT: 3000
     ports:
@@ -72,6 +73,7 @@ services:
       JWT_SECRET: super-secret-change-me
       JWT_ISSUER: roho-telematics
       INTERNAL_API_TOKEN: internal-dev-token
+      OPS_DASHBOARD_TOKEN: ops-local-token-change-me
       RAILS_MAX_THREADS: 8
       RAILS_STREAM_GROUP: rails-consumers
       RAILS_STREAM_CONSUMER: sidekiq-1

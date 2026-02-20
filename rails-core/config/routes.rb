@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
   get "/healthz", to: "health#show"
+  get "/ops", to: "ops/dashboard#show"
+  post "/ops/actions/:name", to: "ops/dashboard#action"
   namespace :internal do
     get "/devices/lookup", to: "devices#lookup"
   end

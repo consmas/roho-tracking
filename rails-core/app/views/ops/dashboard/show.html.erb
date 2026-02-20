@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ops Dashboard</title>
+    <style>
+      body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 16px; background: #f6f8fa; color: #111; }
+      h1, h2 { margin: 8px 0; }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 12px; }
+      .card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
+      .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+      button { border: 1px solid #333; background: #111; color: #fff; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+      pre { background: #0b1020; color: #d6e1ff; padding: 10px; border-radius: 6px; overflow: auto; max-height: 300px; }
+      .flash { padding: 10px; border-radius: 6px; margin: 8px 0; }
+      .notice { background: #e8fff0; border: 1px solid #7fd89f; }
+      .alert { background: #ffeaea; border: 1px solid #ff9b9b; }
+    </style>
+    <meta http-equiv="refresh" content="10">
+  </head>
+  <body>
+    <h1>Ops Dashboard</h1>
+    <div>Timestamp: <%= @status[:ts] %> | Redis Role: <%= @status[:redis_role] %></div>
+
+    <% if flash[:notice] %>
+      <div class="flash notice"><%= flash[:notice] %></div>
+    <% end %>
+    <% if flash[:alert] %>
+      <div class="flash alert"><%= flash[:alert] %></div>
+    <% end %>
+
+    <div class="card" style="margin: 12px 0;">
+      <h2>Actions</h2>
+      <div class="actions">
+        <% [
+          ["enqueue_consumers", "Enqueue Consumers"],
+          ["recreate_groups", "Recreate Groups"],
+          ["replay_pending_telemetry", "Replay Pending Telemetry"],
+          ["ack_pending_telemetry", "Ack Pending Telemetry"],
+          ["clear_retry_set", "Clear Retry Set"],
+          ["clear_dead_set", "Clear Dead Set"]
+        ].each do |name, label| %>
+          <form method="post" action="/ops/actions/<%= name %>?token=<%= ERB::Util.url_encode(params[:token].to_s) %>">
+            <button type="submit"><%= label %></button>
+          </form>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>DB Counters</h2>
+        <pre><%= JSON.pretty_generate(@status[:db]) %></pre>
+      </div>
+      <div class="card">
+        <h2>Sidekiq</h2>
+        <pre><%= JSON.pretty_generate(@status[:sidekiq]) %></pre>
+      </div>
+      <div class="card">
+        <h2>Telemetry Stream</h2>
+        <pre><%= JSON.pretty_generate(@status[:streams][:telemetry]) %></pre>
+      </div>
+      <div class="card">
+        <h2>Command Streams</h2>
+        <pre><%= JSON.pretty_generate({ commands: @status[:streams][:commands], command_results: @status[:streams][:command_results] }) %></pre>
+      </div>
+      <div class="card">
+        <h2>Recent Events</h2>
+        <pre><%= JSON.pretty_generate(@status[:recent][:events]) %></pre>
+      </div>
+      <div class="card">
+        <h2>Recent Commands / Alarms</h2>
+        <pre><%= JSON.pretty_generate({ commands: @status[:recent][:commands], alarms: @status[:recent][:alarms] }) %></pre>
+      </div>
+    </div>
+  </body>
+</html>
