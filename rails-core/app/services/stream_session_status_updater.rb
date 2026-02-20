@@ -6,7 +6,7 @@ class StreamSessionStatusUpdater
   end
 
   def initialize(limit:, client: MediaMtxClient.new)
-    @limit = limit
+    @limit = normalized_limit(limit)
     @client = client
   end
 
@@ -20,6 +20,11 @@ class StreamSessionStatusUpdater
     now = Time.current
 
     sessions.each do |session|
+      if fail_due_to_command_state(session, now)
+        failed += 1
+        next
+      end
+
       path_info = paths[session.stream_name]
       if path_ready?(path_info)
         session.update!(status: :active, last_error: nil)
@@ -44,6 +49,47 @@ class StreamSessionStatusUpdater
   def timed_out?(session, now)
     deadline = session.activation_deadline_at || (session.created_at + request_timeout_seconds.seconds)
     deadline <= now
+  end
+
+  def normalized_limit(value)
+    parsed = value.to_i
+    return 200 if parsed <= 0
+
+    parsed
+  end
+
+  def fail_due_to_command_state(session, now)
+    command_id = session.start_command_id.to_s
+    return false if command_id.empty?
+
+    command = Command.find_by(command_id: command_id)
+    return false if command.nil?
+
+    if command.failed?
+      session.update!(
+        status: :failed,
+        ended_at: now,
+        ended_reason: "start_command_failed",
+        last_error: command.error_message.to_s.presence || "start_command_failed"
+      )
+      return true
+    end
+
+    return false unless command.queued?
+    return false if command.requested_at.nil?
+    return false if command.requested_at > (now - command_timeout_seconds)
+
+    session.update!(
+      status: :failed,
+      ended_at: now,
+      ended_reason: "start_command_timeout",
+      last_error: "start_command_timeout"
+    )
+    true
+  end
+
+  def command_timeout_seconds
+    ENV.fetch("STREAM_COMMAND_TIMEOUT_SECONDS", "45").to_i.seconds
   end
 
   def path_ready?(path_info)

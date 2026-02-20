@@ -128,7 +128,11 @@ func (c *Consumer) handleMessage(ctx context.Context, msg redis.XMessage) {
 		return
 	}
 
-	encoded, err := c.parser.EncodeCommand(command.CommandType, command.Payload)
+	payloadForEncode := clonePayload(command.Payload)
+	payloadForEncode["command_id"] = command.CommandID
+	payloadForEncode["device_uid"] = command.DeviceUID
+	payloadForEncode["command_type"] = command.CommandType
+	encoded, err := c.parser.EncodeCommand(command.CommandType, payloadForEncode)
 	if err != nil {
 		c.metrics.CommandsHandled.WithLabelValues("encode_error").Inc()
 		_ = publish.PublishCommandResult(ctx, c.redis, c.commandResult, command.CommandID, command.DeviceUID, "failed", map[string]any{"reason": err.Error()})
@@ -145,4 +149,15 @@ func (c *Consumer) handleMessage(ctx context.Context, msg redis.XMessage) {
 	c.metrics.CommandsHandled.WithLabelValues("delivered").Inc()
 	_ = publish.PublishCommandResult(ctx, c.redis, c.commandResult, command.CommandID, command.DeviceUID, "delivered", map[string]any{"gateway": c.consumer})
 	_ = c.redis.XAck(ctx, c.stream, c.group, msg.ID).Err()
+}
+
+func clonePayload(in map[string]any) map[string]any {
+	if in == nil {
+		return map[string]any{}
+	}
+	out := make(map[string]any, len(in))
+	for k, v := range in {
+		out[k] = v
+	}
+	return out
 }

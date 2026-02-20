@@ -85,6 +85,7 @@ services:
       MEDIA_MTX_API_BEARER_TOKEN: ""
       STREAM_STATUS_POLL_INTERVAL_SECONDS: 5
       STREAM_REQUEST_TIMEOUT_SECONDS: 90
+      STREAM_COMMAND_TIMEOUT_SECONDS: 45
       STREAM_STATUS_POLL_LIMIT: 200
       RAILS_MAX_THREADS: 8
       PORT: 3000
@@ -124,6 +125,7 @@ services:
       MEDIA_MTX_API_BEARER_TOKEN: ""
       STREAM_STATUS_POLL_INTERVAL_SECONDS: 5
       STREAM_REQUEST_TIMEOUT_SECONDS: 90
+      STREAM_COMMAND_TIMEOUT_SECONDS: 45
       STREAM_STATUS_POLL_LIMIT: 200
       RAILS_MAX_THREADS: 8
       RAILS_STREAM_GROUP: rails-consumers
@@ -144,6 +146,9 @@ services:
       GATEWAY_CAPTURE_ENABLED: "false"
       GATEWAY_CAPTURE_DIR: /tmp/gateway-captures
       GATEWAY_CAPTURE_FRAMES: 40
+      GATEWAY_JOINLGO_DEFAULT_TEMPLATE: "$$CMD,{{command_type}},{{device_uid}},{{command_id}},{{ts_unix}},{{payload_b64}}#"
+      GATEWAY_JOINLGO_START_TEMPLATE: "$$CMD,START_LIVE,{{device_uid}},{{channel}},{{ingest_host}},{{ingest_port}},{{ingest_path}},{{session_id}},{{command_id}},{{ts_unix}}#"
+      GATEWAY_JOINLGO_STOP_TEMPLATE: "$$CMD,STOP_LIVE,{{device_uid}},{{channel}},{{session_id}},{{command_id}},{{ts_unix}}#"
       REDIS_ADDR: redis:6379
       REDIS_DB: 0
       REDIS_EVENTS_STREAM: telemetry.events

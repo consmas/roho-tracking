@@ -139,6 +139,31 @@ Gateway:
 - Protocol mode via `GATEWAY_PROTOCOL`:
   - `binary_json` (simulator/dev)
   - `joinlgo_text` (real JOINLGO `$$...#` frames)
+  - JOINLGO command templates:
+    - `GATEWAY_JOINLGO_START_TEMPLATE`
+    - `GATEWAY_JOINLGO_STOP_TEMPLATE`
+    - `GATEWAY_JOINLGO_DEFAULT_TEMPLATE`
+
+JOINLGO command template placeholders:
+- `{{command_type}}`
+- `{{action}}`
+- `{{command_id}}`
+- `{{device_uid}}`
+- `{{channel}}`
+- `{{session_id}}`
+- `{{stream_name}}`
+- `{{transport}}`
+- `{{ingest_rtsp_url}}`
+- `{{ingest_host}}`
+- `{{ingest_port}}`
+- `{{ingest_path}}`
+- `{{payload_b64}}`
+- `{{seq}}`
+- `{{ts_unix}}`
+- `{{ts_iso}}`
+- `{{ts_yyMMddHHmmss}}`
+
+Use these templates to inject exact vendor packet syntax from real JOINLGO captures without changing gateway code.
 
 Rails:
 - `GET /healthz`
@@ -355,6 +380,7 @@ Optional media URL env vars on Rails:
 - `MEDIA_MTX_API_BEARER_TOKEN` (optional)
 - `STREAM_STATUS_POLL_INTERVAL_SECONDS` (default `5`)
 - `STREAM_REQUEST_TIMEOUT_SECONDS` (default `90`)
+- `STREAM_COMMAND_TIMEOUT_SECONDS` (default `45`)
 - `STREAM_STATUS_POLL_LIMIT` (default `200`)
 
 ### Automatic stream status updater
@@ -363,6 +389,7 @@ Sidekiq now runs a `StreamSessionStatusPollerJob` that periodically queries Medi
 
 - `requested -> active` when stream path is ready/receiving data
 - `requested -> failed` when request timeout is exceeded
+- `requested -> failed` when the start command stays `queued` past command timeout
 
 Logs emitted by sidekiq:
 - `stream_status_poll`
