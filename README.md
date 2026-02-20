@@ -362,6 +362,10 @@ Logs emitted by sidekiq:
 - `stream_status_poll`
 - `stream_status_poller_failed`
 
+MediaMTX API authentication:
+- Set `MEDIA_MTX_API_USERNAME` and `MEDIA_MTX_API_PASSWORD` in `.env.prod`
+- The docker compose config wires these into both `mediamtx` (API user) and Rails/Sidekiq (API client)
+
 ## Scaling Guidance
 
 Gateway:
