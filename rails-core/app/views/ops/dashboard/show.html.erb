@@ -31,6 +31,11 @@
 
     <div class="card" style="margin: 12px 0;">
       <h2>Actions</h2>
+      <div style="margin-bottom: 8px;">
+        <a href="/ops/sidekiq" target="_blank" rel="noopener">Open Sidekiq Web</a>
+        |
+        <a href="/ops.json?token=<%= ERB::Util.url_encode(params[:token].to_s) %>" target="_blank" rel="noopener">Open Ops JSON</a>
+      </div>
       <div class="actions">
         <% [
           ["enqueue_consumers", "Enqueue Consumers"],

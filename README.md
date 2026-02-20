@@ -299,6 +299,7 @@ Operational dashboard for live diagnostics, stream health, and recovery actions:
 
 - URL: `/ops?token=<OPS_DASHBOARD_TOKEN>`
 - JSON: `/ops.json?token=<OPS_DASHBOARD_TOKEN>`
+- Sidekiq Web UI: `/ops/sidekiq` (HTTP Basic auth)
 
 Actions available from dashboard:
 - Enqueue stream consumers
@@ -310,6 +311,8 @@ Actions available from dashboard:
 
 Required env var on Rails:
 - `OPS_DASHBOARD_TOKEN`
+- `OPS_DASHBOARD_USER`
+- `OPS_DASHBOARD_PASSWORD`
 
 ## Scaling Guidance
 
